@@ -50,11 +50,12 @@ Set up the application with the following settings. Anywhere you see amirrajan, 
 
 <img src="twitter-app-settings.png" />
 
-continued...
 
 <img src="twitter-app-settings-2.png" />
 
-Once your twitter account is set up take the sample secret file located at `lib\secret.js.sample` and create `lib\secret.js`, update the twitter related values:
+Once your twitter account is set up, create `lib\secret.js` by duplicating `lib\secret.js.sample` 
+
+For this step, update just the four Twitter-related values, plus the 'callBackUrl' in `lib\secret.js`:
 
     //sample secret.js
     module.exports = {
