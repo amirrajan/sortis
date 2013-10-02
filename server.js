@@ -186,16 +186,6 @@ app.get('/export', requiredAuthentication, function(req, res) {
   res.render('export');
 });
 
-//this gets tagged stored in redis
-//calling client.hgetall("tags") is the same has
-//typing the following command in the redis client: hgetall tags
-//for more infromation on redis commands, visit: http://redis.io/commands
-app.get('/tags', requiredAuthentication, function(req, res) {
-  client.hgetall("tags", function(error, data) {
-    json(res, data);
-  });
-});
-
 //retrieve the maximum number of favorites from twitter (which is 200)
 //and return them as a json payload (passing the json through the
 //forDisplay helper method)
@@ -208,16 +198,26 @@ app.get('/inbox', requiredAuthentication, function(req, res) {
 });
 
 //retrieve all archived tweets stored in redis
-app.get('/archived', requiredAuthentication, function(req, res) {
+app.get('/archived', function(req, res) {
   client.hgetall("archived", function(err, data) {
     json(res, _.map(data, function(d) { return forDisplay(JSON.parse(d)); }));
   });
 });
 
 //retrieve all sorted tweets stored in redis
-app.get('/sorted', requiredAuthentication, function(req, res) {
+app.get('/sorted', function(req, res) {
   client.hgetall("sorted", function(err, data) {
     json(res, _.map(data, function(d) { return forDisplay(JSON.parse(d)); }));
+  });
+});
+
+//this gets tagged stored in redis
+//calling client.hgetall("tags") is the same has
+//typing the following command in the redis client: hgetall tags
+//for more infromation on redis commands, visit: http://redis.io/commands
+app.get('/tags', function(req, res) {
+  client.hgetall("tags", function(error, data) {
+    json(res, data);
   });
 });
 
