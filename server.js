@@ -213,7 +213,7 @@ app.get('/archived', function(req, res) {
 
 app.get('/archived-raw', function(req, res) {
   client.hgetall("archived", function(err, data) {
-    json(res, data);
+    json(res, _.map(data, function(d) { return JSON.parse(d); }));
   });
 });
 
@@ -226,7 +226,7 @@ app.get('/sorted', function(req, res) {
 
 app.get('/sorted-raw', function(req, res) {
   client.hgetall("sorted", function(err, data) {
-    json(res, data);
+    json(res, _.map(data, function(d) { return JSON.parse(d); }));
   });
 });
 
