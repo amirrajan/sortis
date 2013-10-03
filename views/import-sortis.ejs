@@ -1,0 +1,42 @@
+<!--
+  this page is pretty pretty bland, take a look at /views/index.ejs
+  for a meatier page
+-->
+<% include header %>
+
+  <script>
+    $(function() {
+      $("#import").click(importAll);
+    });
+
+    function importAll() {
+      $("#progress").append("<div>import started for tags, sorted and archived...</div>");
+
+      $.post("/import-sortis-tags", { url: $("#url").val() }, function(data) {
+        $("#progress").append("<div>tags imported.</div>");
+      });
+
+      $.post("/import-sortis-sorted", { url: $("#url").val() }, function(data) {
+        $("#progress").append("<div>sorted imported.</div>");
+      });
+
+      $.post("/import-sortis-archived", { url: $("#url").val() }, function(data) {
+        $("#progress").append("<div>archived imported.</div>");
+      });
+    }
+  </script>
+
+  <div id="dashboard">
+    <div class="row">
+      <input id="url" type="text" style="margin-top: 20px" placeholder="enter url to import from another sortis app" class="col-xs-12 col-md-12" />
+      <div class="clearfix visible-xs visible-sm" style="margin-top: 10px"></div>
+      <a id="import" href="javascript:;" style="margin-top: 20px" class="col-md-2">import</a>
+    </div>
+
+    <hr />
+
+    <div id="progress" class="row">
+    </div>
+  </div>
+
+<% include footer %>

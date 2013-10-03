@@ -1,14 +1,16 @@
 //express is a light weight web framework similar to sinatra (ruby), and Nancy (.net)
 //read more about express at: http://expressjs.com/
 var express = require('express');
+var http_request = require('request');
 
 //underscore is a great little library that provides helpful functions for manipulating javascript
 //objects. reard more about underscore at: http://underscorejs.org/
 var _ = require('underscore');
 
 //initialize express
+var http = require('http');
 var app = express();
-var server = require('http').createServer(app);
+var server = http.createServer(app);
 
 //load all of our custom libraries (be sure to go through these files too)
 var config = require('./lib/config');
@@ -186,6 +188,11 @@ app.get('/export', requiredAuthentication, function(req, res) {
   res.render('export');
 });
 
+//this http/get renders the template in /views/export.ejs (go there for more information)
+app.get('/import-sortis', requiredAuthentication, function(req, res) {
+  res.render('import-sortis');
+});
+
 //retrieve the maximum number of favorites from twitter (which is 200)
 //and return them as a json payload (passing the json through the
 //forDisplay helper method)
@@ -204,10 +211,22 @@ app.get('/archived', function(req, res) {
   });
 });
 
+app.get('/archived-raw', function(req, res) {
+  client.hgetall("archived", function(err, data) {
+    json(res, data);
+  });
+});
+
 //retrieve all sorted tweets stored in redis
 app.get('/sorted', function(req, res) {
   client.hgetall("sorted", function(err, data) {
     json(res, _.map(data, function(d) { return forDisplay(JSON.parse(d)); }));
+  });
+});
+
+app.get('/sorted-raw', function(req, res) {
+  client.hgetall("sorted", function(err, data) {
+    json(res, data);
   });
 });
 
@@ -227,6 +246,42 @@ app.post('/markSorted', requiredAuthentication, function (req, res) {
   twitter.unfavorite({ }, { "id": req.body.id_str }, error(res), function(data) {
     client.hset('sorted', req.body.id_str, JSON.stringify(data));
     json(res, data);
+  });
+});
+
+app.post('/import-sortis-tags', requiredAuthentication, function(req, res) {
+  http_request("http://sortis.nodejitsu.com/tags", function (error, response, tags) {
+    var tags_json = JSON.parse(tags);
+
+    for(var key in tags_json) {
+      client.hset("tags", key, tags_json[key] + " imported!");
+    }
+
+    json(res, tags);
+  });
+});
+
+app.post('/import-sortis-sorted', requiredAuthentication, function(req, res) {
+  http_request("http://sortis.nodejitsu.com/sorted-raw", function (error, response, sorted) {
+    var sorted_json = JSON.parse(sorted);
+
+    _.each(sorted_json, function(tweet) {
+      client.hset('sorted', tweet.id_str, JSON.stringify(tweet));
+    });
+
+    json(res, sorted);
+  });
+});
+
+app.post('/import-sortis-archived', requiredAuthentication, function(req, res) {
+  http_request("http://sortis.nodejitsu.com/archived-raw", function (error, response, archived) {
+    var archived_json = JSON.parse(archived);
+
+    _.each(archived_json, function(tweet) {
+      client.hset('archived', tweet.id_str, JSON.stringify(tweet));
+    });
+
+    json(res, archived);
   });
 });
 
