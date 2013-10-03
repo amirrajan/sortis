@@ -9,6 +9,7 @@ var _ = require('underscore');
 
 //initialize express
 var http = require('http');
+var http_url = require('url');
 var app = express();
 var server = http.createServer(app);
 
@@ -249,8 +250,11 @@ app.post('/markSorted', requiredAuthentication, function (req, res) {
   });
 });
 
+//this will import all tags from another Sortis application
 app.post('/import-sortis-tags', requiredAuthentication, function(req, res) {
-  http_request("http://sortis.nodejitsu.com/tags", function (error, response, tags) {
+  var url = req.body.url;
+
+  http_request(http_url.resolve(url, "/tags"), function (error, response, tags) {
     var tags_json = JSON.parse(tags);
 
     for(var key in tags_json) {
@@ -262,7 +266,9 @@ app.post('/import-sortis-tags', requiredAuthentication, function(req, res) {
 });
 
 app.post('/import-sortis-sorted', requiredAuthentication, function(req, res) {
-  http_request("http://sortis.nodejitsu.com/sorted-raw", function (error, response, sorted) {
+  var url = req.body.url;
+
+  http_request(http_url.resolve(url, "/sorted-raw"), function (error, response, sorted) {
     var sorted_json = JSON.parse(sorted);
 
     _.each(sorted_json, function(tweet) {
@@ -274,7 +280,9 @@ app.post('/import-sortis-sorted', requiredAuthentication, function(req, res) {
 });
 
 app.post('/import-sortis-archived', requiredAuthentication, function(req, res) {
-  http_request("http://sortis.nodejitsu.com/archived-raw", function (error, response, archived) {
+  var url = req.body.url;
+
+  http_request(http_url.resolve(url, "/archived-raw"), function (error, response, archived) {
     var archived_json = JSON.parse(archived);
 
     _.each(archived_json, function(tweet) {
