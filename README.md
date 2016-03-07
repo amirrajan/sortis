@@ -42,6 +42,8 @@ And `cd` into the directory (all instructions below assume you are in the `sorti
 
 Using a command prompt where `node` is available, run the following command to install all Sortis dependencies:
 
+    npm install -g grunt
+    npm install -g grunt-cli
     npm install (you may need to prefix this with sudo if you're on Mac/Linux)
 
 Register for a Twitter developer account: https://dev.twitter.com/user/login?destination=home
@@ -56,62 +58,61 @@ Set up the application with the following settings. Anywhere you see amirrajan, 
 
 <img src="twitter-app-settings-2.png" />
 
-*Note: "Allow this application to be used to Sign in with Twitter" should be **unchecked** (just poor screenshot mouse placement on my part)*
+Once your twitter account is set up, create a `.env` file by duplicating `env.sample` then update *just* the four Twitter-related values, plus the 'callBackUrl'. Here is the full `.env` file:
 
-Once your twitter account is set up, create `lib\secret.js` by duplicating `lib\secret.js.sample` then update *just* the four Twitter-related values, plus the 'callBackUrl' in `lib\secret.js`:
+    consumerKey=XXXXXXXXXXXXXXXX
+    consumerSecret=XXXXXXXXXXXXXXXX
+    accessToken=XXXXXXXXXXXXXXXX
+    accessTokenSecret=XXXXXXXXXXXXXXXX
+    callBackUrl=XXXXXXXXXXXXXXXX
+    password=XXXXXXXXXXXXXXXX
+    mobile=XXXXXXXXXXXXXXXX
+    twilioAssignedPhoneNumber=XXXXXXXXXXXXXXXX
+    twilioAccountSid=XXXXXXXXXXXXXXXX
+    twilioAuthToken=XXXXXXXXXXXXXXXX
+    enableAuth=false
 
-    //sample secret.js
-    module.exports = {
-        "consumerKey": "", //set this value from twitter
-        "consumerSecret": "", //set this value from twitter
-        "accessToken": "", //set this value from twitter
-        "accessTokenSecret": "", //set this value from twitter
-        "callBackUrl": "http://127.0.0.1/",
-        "password": "", //no need for password when running locally
-        "mobile": "",  //no need for mobile number when running locally
-        "twilioAssignedPhoneNumber": "",  //no need for mobile number when running locally
-        "twilioAccountSid": "", //no need for twilio values when running locally
-        "twilioAuthToken": "", //no need for twilio values when running locally
-        "redisPort": 6379, //no redis values are needed when running locally
-        "redisMachine": "", //no redis values are needed when running locally
-        "redisAuth": "", //no redis values are needed when running locally
-        "enableAuth": false //two phase autorization is disabled when running locally
-    };
+Here are the values you need to update:
+
+    consumerKey=XXXXXXXXXXXXXXXX
+    consumerSecret=XXXXXXXXXXXXXXXX
+    accessToken=XXXXXXXXXXXXXXXX
+    accessTokenSecret=XXXXXXXXXXXXXXXX
+    callBackUrl=XXXXXXXXXXXXXXXX
 
 Values are located on the detail page of Twitter:
 
 <img src="twitter-secret.png" />
 
+Make sure the redis server is running, by running this command:
+
+    redis-server
+
 At this point you'll should be able to run the app locally:
 
-    node server.js
+    grunt
 
 To view the app, go to `http://localhost:3000`, the code has a lot of comments. Crack it open and read :-) (start with `\server.js`)
 
-### Running the app "in the cloud" 
+### Running the app "in the cloud"
 
 ### Securing the app with a two-phase auth
 
-Given that this app is hard wired to your twitter account, it's best that you run the app with `enableAuth` set to `true`. With authorization enabled, you'll need to provide a password and an authorization code to access the site. If you get the password correct, a text message will be sent (via Twilio) to a mobile device you've specified in 
-`secret.js`.
+Given that this app is hard wired to your twitter account, it's best that you run the app with `enableAuth` set to `true`. With authorization enabled, you'll need to provide a password and an authorization code to access the site. If you get the password correct, a text message will be sent (via Twilio) to a mobile device you've specified in
+`.env`.
 
 ### Register a free account with Twilio
 
 Sign up with a free Twilio account: https://www.twilio.com/try-twilio
 
-Update `lib\secret.js`:
+Update your `.env` file:
 
-    //sample secret.js
-    module.exports = {
-        ....
-        "password": "", //set a password (plain text)
-        "mobile": "",  //this will be your mobile number, example: +15555551234
-        "twilioAssignedPhoneNumber": "",  //phone number twilio assigns you: +15555554240
-        "twilioAccountSid": "", //value provided by Twilio
-        "twilioAuthToken": "", //value provided by Twilio
-        ....
-        "enableAuth": true //be sure this is to true when you deploy publicly
-    };
+    password=[set a password (plain text)]
+    mobile=[this will be your mobile number example: +15555551234]
+    twilioAssignedPhoneNumber=[phone number twilio assigns you: +15555554240]
+    twilioAccountSid=[value provided by Twilio]
+    twilioAuthToken=[value provided by Twilio]
+    enableAuth=true
 
 Values are located here and here:
 
@@ -121,78 +122,9 @@ Values are located here and here:
 
 Once you've set these values up, try running the app locally with authorization enabled. After entering your password, you should receive a text message on your devise.
 
-### Signing up and running Sortis on Nodejitsu
-
-The documenation was available on the front page (right under the sign up for free button): https://www.nodejitsu.com/getting-started/
-
-Install the Nodejitsu Package
-
-    npm install jitsu -g (you may need to prefix this with sudo if you're on Mac)
-
-Register via the command line:
-
-    jitsu signup (yes you can sign up via the command line, which is awesome)
-
-You'll get a confirmation email with a command to type in:
-
-    jitsu users confirm [username] [confirmation-guid]
-
-If you've already registered, you can login with:
-
-    jitsu login
-
-After you confirm your email, you can login (the `confirm` command should prompt you to log in).
-
-Change the `subdomain` value in `package.json`, to reflect the url you want to deploy to:
-
-    {
-      "name": "sortis",
-      [...],
-      "subdomain": "amirrajan-sortis" <--- this value
-    }
-
-Create a redis database:
-
-    jitsu databases create redis sortis
-
-You'll get an output similar to this:
-
-    info: Executing command databases create redis sortis
-    info: A new redis has been created
-    data: Database Type: redis
-    data: Database Name: sortis
-    data: Connection host: nodejitsu___________.redis._______.com
-    data: Connection port: 6379
-    data: Connection auth: nodejitsu___________.redis._______.com:__________
-
-update the values in `secret.js`
-
-    module.exports = {
-        ...
-        "redisPort": 6379, //Connection port value from output above
-        "redisMachine": "", //Connection host value from output above
-        "redisAuth": "", //Connection auth value from output above
-        ...
-    };
-
-now deploy:
-
-    jitsu deploy
-
-note: **if you add lib/secret.js to your .gitignore it will not be deployed and the app will not run**. Ideally (once you get the hang of deploying this app), you'll want to move all the information in secret.js to environment variables in your production environment, for information on getting and setting environment variables for nodejitsu use `jitsu help env`.
-
-Here is what secret.js may look like after migrating everything over to environment variables:
-
-    module.exports = {
-        "consumerKey": process.env.consumerKey,
-        [...]
-    }
-
-And your app should be up on Nodejitsu now.
-
 ##Signing up and running Sortis on Heroku
 
-From heroku.com, click Documentation, then click the Getting Started button, then click Node.js from the list of options on the left...which will take you here: https://devcenter.heroku.com/articles/nodejs 
+From heroku.com, click Documentation, then click the Getting Started button, then click Node.js from the list of options on the left...which will take you here: https://devcenter.heroku.com/articles/nodejs
 
 Install Heroku toolbelt from here: https://toolbelt.heroku.com/
 
@@ -210,32 +142,28 @@ Add redis to your app
 
     heroku addons:add redistogo:nano
 
-For heroku, the `redisPort`, `redisMachine`, `redisAuth` values in `secret.js` are not used (the Redis connection in Heroku is provided by an enviornment variable `process.env.REDISTOGO_URL`
+The Redis connection in Heroku is provided by an enviornment variable `process.env.REDISTOGO_URL`
 
 Git deploy your app:
 
     git push heroku master
 
-note: **if you add lib/secret.js to your .gitignore it will not be deployed and the app will not run**. Ideally (once you get the hang of deploying this app), you'll want to move all the information in secret.js to environment variables in your production environment, for information on getting and setting environment variables for heroku use `heroku help config`
+Set the environment variables on the server:
 
-Here is what secret.js may look like after migrating everything over to environment variables:
-
-    module.exports = {
-        "consumerKey": process.env.consumerKey,
-        [...]
-    }
-
-Assign a dyno to your app:
-
-    heroku ps:scale web=1
+    heroku config:set consumerKey=XXXXXXXXXXXXXXXX
+    heroku config:set consumerSecret=XXXXXXXXXXXXXXXX
+    heroku config:set accessToken=XXXXXXXXXXXXXXXX
+    heroku config:set accessTokenSecret=XXXXXXXXXXXXXXXX
+    heroku config:set callBackUrl=XXXXXXXXXXXXXXXX
+    heroku config:set password=XXXXXXXXXXXXXXXX
+    heroku config:set mobile=XXXXXXXXXXXXXXXX
+    heroku config:set twilioAssignedPhoneNumber=XXXXXXXXXXXXXXXX
+    heroku config:set twilioAccountSid=XXXXXXXXXXXXXXXX
+    heroku config:set twilioAuthToken=XXXXXXXXXXXXXXXX
+    heroku config:set enableAuth=false
 
 Open the app (same as opening it in the browser):
 
     heroku open
 
 And your app should be up on Heroku.
-
-
-### Signing up, and deploying to Azure
-
-Azure does not offer a PaaS offering for NodeJS + Redis at this time

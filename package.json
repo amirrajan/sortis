@@ -24,7 +24,13 @@
     "twilio": "~1.1.4",
     "request": "~2.27.0"
   },
-  "subdomain": "sortis",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-cli": "^0.1.13",
+    "grunt-env": "~0.4.1",
+    "grunt-nodemon": "~0.2.0",
+    "nodemon": "~1.0.14"
+  },
   "engines": {
     "node": "0.10.x"
   }

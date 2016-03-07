@@ -12,10 +12,16 @@ var http = require('http');
 var http_url = require('url');
 var app = express();
 var server = http.createServer(app);
+var env = process.env;
+if(env.enableAuth == "false") {
+  env.enableAuth = false;
+} else {
+  env.enableAuth = true;
+}
+
 
 //load all of our custom libraries (be sure to go through these files too)
 var config = require('./lib/config');
-var secret = require('./lib/secret');
 var Twitter = require('./lib/twitter').Twitter;
 
 //this is a node wrapper around redis, all the commands for
@@ -24,19 +30,16 @@ var redis = require("redis");
 
 //initialize an instance of our twitter api wrapper, look at lib/twitter.js for more
 //information about how to extend this module
-var twitter = new Twitter(secret);
+var twitter = new Twitter();
 
 //setup a redis client based on if the environment is development or production
 var client = null;
 if(process.env.REDISTOGO_URL) { //heroku
-  client = require('redis-url').connect(process.env.REDISTOGO_URL); 
+  client = require('redis-url').connect(process.env.REDISTOGO_URL);
 } else if(config.env == "development") {
   client = redis.createClient();
-}  else { //nodejitsu
-  client = redis.createClient(secret.redisPort, secret.redisMachine);
-  client.auth(secret.redisAuth, function (err) {
-     if (err) { throw err; }
-  });
+}  else {
+  throw "Not sure how to connect to redis.";
 }
 
 //setting some values for our express application
@@ -54,7 +57,7 @@ app.use('/public', express.static('public'));
 app.use(express.methodOverride());
 app.use(express.bodyParser());
 app.use(express.cookieParser());
-app.use(express.session({ secret: secret.consumerKey }));
+app.use(express.session({ secret: env.consumerKey }));
 app.use(app.router);
 
 //catch all error handler
@@ -84,7 +87,7 @@ var forDisplay = function(tweet) {
     id_str: tweet.id_str,
     text: tweet.text,
     links_in_text: tweet.entities.urls,
-    user: { 
+    user: {
       name: tweet.user.name,
       screen_name: tweet.user.screen_name,
       profile_image_url: tweet.user.profile_image_url
@@ -92,12 +95,18 @@ var forDisplay = function(tweet) {
   };
 };
 
+function parseBool(value) {
+  if(value == "false") return false;
+
+  return true;
+}
+
 //for those have have used rails or asp.net mvc, this
 //is express's version of a before_filter (rails) or
 //an ActionFilter (asp.net mvc)
 //this filter verifies the authorization
 function requiredAuthentication(req, res, next) {
-  if(!secret.enableAuth) {
+  if(!parseBool(env.enableAuth)) {
     next();
   } else if (req.session.passwordCorrect && req.session.mobileConfirmCorrect) {
     next();
@@ -108,30 +117,24 @@ function requiredAuthentication(req, res, next) {
   }
 }
 
-//returns the env environment variable as a json
-//payload
-app.get('/env', function(req, res) {
-  json(res, { env: config.env });
-});
-
 app.get('/login', function (req, res) {
   res.render('login');
 });
 
 //if the password matches what was specified
-//in secret.js, generate a random 5 digit number
+//in the enviornment variables, generate a random 5 digit number
 //and send a text message to the user via twilio
 app.post('/login', function (req, res) {
-  if(req.body.password === secret.password) {
+  if(req.body.password === env.password) {
     req.session.mobileConfirmation = Math.floor(Math.random() * 99999) + 10000;
 
-    var client = require('twilio')(secret.twilioAccountSid, secret.twilioAuthToken);
+    var client = require('twilio')(env.twilioAccountSid, env.twilioAuthToken);
 
     client.sendSms({
-        to: secret.mobile,
-        from: secret.twilioAssignedPhoneNumber,
+        to: env.mobile,
+        from: env.twilioAssignedPhoneNumber,
         body: req.session.mobileConfirmation
-    }, function(err, responseData) { 
+    }, function(err, responseData) {
     });
 
     req.session.passwordCorrect = true;
@@ -165,7 +168,7 @@ app.post('/login2', function (req, res) {
   }
 });
 
-//main page (notice that all these interactions have the 
+//main page (notice that all these interactions have the
 //requiredAuthentication filter specified
 //if the user isn't authenticated, he will be directed
 //to /login,
