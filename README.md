@@ -154,10 +154,10 @@ Set the environment variables on the server:
     heroku config:set consumerSecret=XXXXXXXXXXXXXXXX
     heroku config:set accessToken=XXXXXXXXXXXXXXXX
     heroku config:set accessTokenSecret=XXXXXXXXXXXXXXXX
-    heroku config:set callBackUrl=XXXXXXXXXXXXXXXX
+    heroku config:set callBackUrl=[root url for your heroku app]
     heroku config:set password=XXXXXXXXXXXXXXXX
-    heroku config:set mobile=XXXXXXXXXXXXXXXX
-    heroku config:set twilioAssignedPhoneNumber=XXXXXXXXXXXXXXXX
+    heroku config:set mobile=+15555555555
+    heroku config:set twilioAssignedPhoneNumber=+15555555555
     heroku config:set twilioAccountSid=XXXXXXXXXXXXXXXX
     heroku config:set twilioAuthToken=XXXXXXXXXXXXXXXX
     heroku config:set enableAuth=false
