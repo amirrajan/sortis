@@ -125,6 +125,10 @@ app.get('/login', function (req, res) {
 //in the enviornment variables, generate a random 5 digit number
 //and send a text message to the user via twilio
 app.post('/login', function (req, res) {
+    console.log('here');
+    console.log('here');
+    console.log('here');
+    console.log('here');
   if(req.body.password === env.password) {
     req.session.mobileConfirmation = Math.floor(Math.random() * 99999) + 10000;
 
@@ -135,10 +139,15 @@ app.post('/login', function (req, res) {
         from: env.twilioAssignedPhoneNumber,
         body: req.session.mobileConfirmation
     }, function(err, responseData) {
+        if(err) {
+          res.send(err);
+          return;
+        }
+
+        req.session.passwordCorrect = true;
+        res.redirect('/');
     });
 
-    req.session.passwordCorrect = true;
-    res.redirect('/');
   } else {
     res.redirect('/login');
   }

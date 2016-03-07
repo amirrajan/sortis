@@ -66,8 +66,8 @@ Once your twitter account is set up, create a `.env` file by duplicating `env.sa
     accessTokenSecret=XXXXXXXXXXXXXXXX
     callBackUrl=XXXXXXXXXXXXXXXX
     password=XXXXXXXXXXXXXXXX
-    mobile=XXXXXXXXXXXXXXXX
-    twilioAssignedPhoneNumber=XXXXXXXXXXXXXXXX
+    mobile=+15555555555
+    twilioAssignedPhoneNumber=+15555555555
     twilioAccountSid=XXXXXXXXXXXXXXXX
     twilioAuthToken=XXXXXXXXXXXXXXXX
     enableAuth=false
