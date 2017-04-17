@@ -122,7 +122,7 @@ Values are located here and here:
 
 Once you've set these values up, try running the app locally with authorization enabled. After entering your password, you should receive a text message on your devise.
 
-##Signing up and running Sortis on Heroku
+## Signing up and running Sortis on Heroku
 
 From heroku.com, click Documentation, then click the Getting Started button, then click Node.js from the list of options on the left...which will take you here: https://devcenter.heroku.com/articles/nodejs
 
